@@ -29,10 +29,27 @@ def menu():
 
         @app.route('/biblioteca/insert', methods=['POST'])
         def insere_livro():
-            novo_livro = request.get_json()
-            biblioteca.append(novo_livro)
-            dados.salvar_no_arquivo(biblioteca)
-            return "", 204
+            # novo_livro = request.get_json()
+            if request.method == 'POST':
+                novo_livro = {
+                            'isbn': request.form.get('isbn'),
+                            'titulo': request.form.get('titulo'),
+                            'autor': request.form.get('autor'),
+                            'genero': request.form.get('genero'),
+                            'ano_publicacao': request.form.get('ano_publicacao'),
+                            'editora': request.form.get('editora'),
+                            'paginas': request.form.get('paginas'),
+                            'status': request.form.get('status'),
+                            'localizacao': request.form.get('localizacao')
+                    }
+                for l in biblioteca:
+                    if l ['isbn'] == novo_livro['isbn']:
+                        return jsonify("Livro já está cadastrado"),200
+                biblioteca.append(novo_livro)
+                dados.salvar_no_arquivo(biblioteca)
+                return render_template('biblioteca.html', biblioteca=biblioteca)
+            else:
+                return render_template('criar_livro.html')
 
         @app.route('/biblioteca/delete/<isbn>', methods = ['DELETE'])
         def detalha_livro(isbn):
