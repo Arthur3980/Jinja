@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, render_template, flash
 import dados
 import funcoes
 
@@ -6,6 +6,7 @@ def menu():
 
 
         app = Flask(__name__)
+        # app.config('SECRET_KEY')
         biblioteca = dados.carregar_do_arquivo()
 
         @app.route('/')
@@ -27,7 +28,7 @@ def menu():
                     return jsonify(1)
             return jsonify ("message: livro não localizado"),404
 
-        @app.route('/biblioteca/insert', methods=['POST'])
+        @app.route('/biblioteca/insert', methods=['GET', 'POST'])
         def insere_livro():
             # novo_livro = request.get_json()
             if request.method == 'POST':
@@ -71,7 +72,13 @@ def menu():
                     return jsonify ("message: livro alterado com sucesso"),200
             return jsonify("message: livro não localizado"),404
 
-
+        @app.route('/biblioteca/excluir/<isbn>', methods=['POST'])
+        def excluir_livro(isbn):
+            biblioteca = dados.carregar_do_arquivo()
+            biblioteca = [livro for livro in biblioteca if livro['isbn'] != isbn]
+            dados.salvar_no_arquivo(biblioteca)
+            flash(f'Livro com ISBN {isbn} foi removido com sucesso!', 'success')
+            return redirect(url_for('menu'))
         
 
         # if __name__ == "__main__":
